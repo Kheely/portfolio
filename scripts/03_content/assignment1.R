@@ -12,3 +12,8 @@ p <- ggplot(data_lionfish,
   facet_wrap(~site)
 
 ?geom_point
+
+view(data_lionfish)
+ggplot(data_lionfish,
+       aes(x = size_class, y = depth_m)) +
+  geom_point(colour = "blue")
