@@ -55,10 +55,10 @@ Three main folders within the repository:
 
 
 ## Results
-(results/img/sst_detection_variation.png)
-(results/img/salinity_species_detections.png)
-(results/img/sst_species_detections.png)
-(results/img/species_detections_plot.png)
+![Looking at species detections variation with different SST](results/img/sst_detection_variation.png)
+![Looking at species detections compared to salinity](results/img/salinity_species_detections.png)
+![Looking at species detections compared to sea surface temperature changes](results/img/sst_species_detections.png)
+![Looking at total number of species detections](results/img/species_detections_plot.png)
 
 ## Author
 
