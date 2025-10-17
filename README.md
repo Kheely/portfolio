@@ -5,9 +5,9 @@ My portfolio
 
 The objective of my project is to use data I have collected from drone 
 surveys and analyze for any trends in biodiversity or relative abundance of marine 
-megafauna. I have data of flight logs, environmental parameters, and species 
-detections. I will look to see if different environmental factors influence 
-species detections. 
+megafauna. I have data sets containing environmental parameters and species 
+detections. I will wrangle and clean this data to see if different environmental
+factors influence species detections. 
 
 ## Repository Structure
 Three main folders within the repository:
