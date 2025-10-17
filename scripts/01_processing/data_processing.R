@@ -109,6 +109,9 @@ detections_bar <- clean_data |>
 
 
 # EXPORT
+  #saving cleaned & combined data set into the processed folder
+saveRDS(clean_data, "data/processed/cleaned_combined_data.rds")
+
   #saving plots I made above to the results folder
 
 ggsave(plot = detections_bar,

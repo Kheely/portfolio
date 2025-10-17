@@ -23,7 +23,7 @@ Three main folders within the repository:
 - `results/`: contains figures 
 
 ## About the data
-##
+### Column names of clean data
 - `date`  - Numeric
 - `site_x` - Character - Options are "Deering" and "Crandon"
 - `number_individuals` - Numeric
