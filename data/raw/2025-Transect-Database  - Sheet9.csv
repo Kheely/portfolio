@@ -1,0 +1,19 @@
+site,transect_id,start_end,latitude ,longitude
+deering,1.1,start,25.61099,-80.30694
+deering,1.1,end ,25.611038,-80.302953
+deering,1.2,start,25.611503,-80.30253
+deering,1.2,end ,25.611463,-80.306516
+deering,2.1,start,25.61429,-80.30607
+deering,2.1,end ,25.614346,-80.302079
+deering,2.2,start,25.613895,-80.302068
+deering,2.2,end ,25.613847,-80.306051
+deering,3.1,start,25.615488,-80.302741
+deering,3.1,end ,25.6155399,-80.298753
+deering,3.2,start,25.615991,-80.298773
+deering,3.2,end ,25.615971,-80.302759
+crandon,1.1,start,25.715048,-80.149202
+crandon,1.1,end ,25.715072,-80.145212
+crandon,1.2,start,25.714623,-80.145185
+crandon,1.2,end ,25.714611,-80.149179
+crandon,1.3,start,25.714157,-80.149187
+crandon,1.3,end ,25.714169,-80.145192
