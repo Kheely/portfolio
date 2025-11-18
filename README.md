@@ -7,7 +7,8 @@ The objective of my project is to use data I have collected from drone
 surveys and analyze for any trends in biodiversity or relative abundance of marine 
 megafauna. I have data sets containing environmental parameters and species 
 detections. I will wrangle and clean this data to see if different environmental
-factors influence species detections. 
+factors influence species detections. Then I will visualize the spatial data from
+my drone transects by creating a combined map. 
 
 ## Repository Structure
 Three main folders within the repository:
