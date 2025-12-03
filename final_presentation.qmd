@@ -1,0 +1,284 @@
+---
+title: "Final Presentation"
+subtitle: "Drone Research Project"
+author: "Kimberly Heely"
+institute: "Rosenstiel School of Marine, Atmospheric, and Earth Science"
+format: 
+  revealjs: 
+    incremental: true
+
+---
+
+## Introduction
+
+- Drone research MPS project, conducted under the Macdonald Lab and the Shark Research & Conservation Program at the University of Miami 
+
+- Systematic transects are utilized for standardization
+
+- Study sites: 
+    - Deering Estate (3 launch locations, each with 2 transects) 
+    - Crandon Park (1 launch location with 3 transects)
+
+
+## Objectives
+
+- Goal: Assess biodiversity and relative abundance of marine megafauna around Deering Estate and Crandon Park near Miami, FL
+
+- Assess potential variations in comparison to environmental parameters and human presence
+
+```{r}
+#| label: fig-myplot1
+#| fig-cap: "Graph of my study location, (A) Florida peninsula, (B) zoomed into south Florida, Miami area, (C) Deering Estate, (D) Crandon Park"
+#| fig-width: 8
+#| fig-height: 4
+
+## Load packages
+library(tidyverse)
+library(EVR628tools)
+library(readr)
+library(ggspatial)
+library(rnaturalearth)
+library(sf)
+library(mapview)
+library(janitor)
+library(cowplot)
+
+## Load data
+  # Load FL sf
+florida <- read_sf("data/raw/Florida_Shapefile/Detailed_Florida_State_Boundary.shp") |>
+  st_transform(florida, crs = "EPSG:4326")
+transects <- read_csv("data/raw/2025-Transect-Database  - Sheet9.csv")
+
+# PROCESSING
+  # Making tansect data into a sf
+transects_sf <- st_as_sf(transects, coords = c("longitude","latitude"), crs = "EPSG:4326")
+
+
+  # Adding in a line to connect the start/end points of each transect
+transect_lines <- transects_sf |>
+  group_by(`site`,`transect_id`) |>
+  summarize(do_union = FALSE,
+            .groups = "drop") |>
+  st_cast("LINESTRING")
+
+  # Adding coordinates to crop the FL sf to just show around Miami (including study sites)
+miami <- st_bbox(c(
+  xmin = -80.40,  # west: covers Deering Estate area
+  ymin = 25.50,   # south: slightly below Deering Estate
+  xmax = -80.10,  # east: extends past Crandon Park
+  ymax = 25.80    # north: covers downtown Miami area
+), crs = st_crs(florida))
+
+
+# VISUALIZE
+# Build plot of FL peninsula
+florida_plot <- ggplot() +
+  geom_sf(data = florida) +
+  geom_rect(aes(xmin = -80.40, xmax = -80.10, ymin = 25.50, ymax = 25.80),
+            color = "red", fill = NA, linewidth = 1) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Florida, USA",
+       x = "Longitude",
+       y = "Latitude") +
+  annotation_north_arrow(location = "tl",
+                         which_north = "true") +
+  annotation_scale(location = "bl")
+
+
+ # Preparing to add boxes around study sites on zoomed in plot
+    # Deering Estate bbox
+deering_bbox <- st_as_sfc(st_bbox(c(
+  xmin = -80.31, xmax = -80.285,
+  ymin = 25.605, ymax = 25.625
+), crs = st_crs(florida)))
+
+    # Crandon Park bbox
+crandon_bbox <- st_as_sfc(st_bbox(c(
+  xmin = -80.175, xmax = -80.135,
+  ymin = 25.695, ymax = 25.735
+), crs = st_crs(florida)))
+
+
+# Plot of FL zoomed into Miami area (including both study sites)
+florida_crop <- st_crop(florida, miami)
+
+fl_crop_plot <- ggplot() +
+  geom_sf(data = florida_crop) +
+  geom_sf(data = deering_bbox, color = "red", fill = NA, linewidth = 1) +
+  geom_sf(data = crandon_bbox, color = "red", fill = NA, linewidth = 1) +
+  annotate("text",
+           x = -80.31 - 0.01,   # xmax + small offset
+           y = (25.605 + 25.625)/2,    # ymax + small offset
+           label = "C", color = "black", size = 4, fontface = "bold") +
+  annotate("text",
+           x = -80.175 - 0.01,   # xmax + small offset
+           y = (25.695 + 25.735)/2,    # ymax + small offset
+           label = "D", color = "black", size = 4) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Study Sites Locations",
+       x = "Longitude",
+       y = "Latitude") +
+  annotation_scale(location = "bl")
+
+# Plot for Deering transects
+deering_transects <- ggplot() +
+  geom_sf(data = florida_crop, fill = "lightgrey", color = NA) +
+  geom_sf(data = transect_lines, color = "darkblue", size = 1) +
+  geom_sf(data = transects_sf) +
+  coord_sf(xlim = c(-80.31, -80.285), ylim = c(25.605, 25.620)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Deering Estate Transects",
+       x = "Longitude",
+       y = "Latitude") +
+  annotation_scale(location = "bl")
+
+# Plot for Crandon transects
+crandon_transects <- ggplot() +
+  geom_sf(data = florida_crop, fill = "lightgrey", color = NA) +
+  geom_sf(data = transect_lines, color = "darkblue", size = 1) +
+  geom_sf(data = transects_sf) +
+   coord_sf(xlim = c(-80.160, -80.139), ylim = c(25.710, 25.721)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Crandon Park Transects",
+       x = "Longitude",
+       y = "Latitude",
+       caption = "Data derived from my drone research project") +
+  annotation_scale(location = "bl")
+
+combined_plots <- plot_grid(florida_plot, fl_crop_plot,
+                            deering_transects, crandon_transects,
+          ncol = 2,
+          rel_heights = 1,
+          labels = c("A)", "B)", "C)", "D)"),
+          label_x = 0.1)
+combined_plots
+```
+
+## Data sources
+
+- I have obtained the data for this project along side some other lab members within the Macdonald lab
+
+- All data is stored in a shared online database, and videos are stored on several hard drives
+
+- Data gathered from this study are a combination of categorical and numerical
+
+## Data processing
+
+- Raw data was saved as a CSV file and then read into RStudio
+
+- Data was then cleaned (cleaned the date, column names, etc.) to make it easier to work with
+
+- A left join was done to combine the csv file of environmental data to the csv file of species detections (joined together by transect ID) to then create visualizations using ggplot to assess potential trends in the data
+
+```{r}
+species_detections <- read.csv("data/raw/drone_species_detections.csv")
+environmentals <- read.csv("data/raw/drone_environmental_data.csv")
+
+combined_data <- species_detections |>
+  left_join(environmentals, by = "DATE")
+
+  #cleaning data
+  #removing columns that are not needed for this analysis
+cleaning <- combined_data |>
+  select(-SCREENGRAB_LINK, -COMMENTS, -TIDE_SOURCE, -X._PEOPLE_CP,
+         X._PEOPLE_PD, -X._PEOPLE_BB, -X._PEOPLE_DP, -CL_CON_SOURCE,
+         -CL_CON_TIME,-O2_PPM_SOURCE, -O2_PPM_TIME, -O2._SOURCE,
+         -O2._TIME, -SALINITY_SOURCE, -SALINITY_TIME, -WIND_SOURCE,
+         -WIND_TIME, -SST_SOURCE, -SST_TIME, -SITE.y, -ADJUSTED_DETECTION_TIME,
+         -DETECTION_TIME_STAMP, -ROAMING_SYSTEMATIC)
+
+  #cleaning column names
+clean_data <-cleaning |>
+  clean_names()
+
+clean_data$date <- mdy(clean_data$date)
+
+
+clean_date <- as.Date(clean_data$date)
+
+```
+
+## Main Findings
+
+-   The total number of individuals detected so far in this study is **`r sum(clean_data$number_individuals, na.rm = TRUE)`**
+
+-   The number of detections decreased during the summer months, when the SST was higher, and increased again during cooler temperatures
+
+```{r, warning= FALSE, echo= FALSE}
+#| label: fig-myplot2
+#| fig-cap: "Most commonly detected species (left), and trend of species abundance over time (right)"
+
+## Load packages
+library(tidyverse)
+library(EVR628tools)
+library(readr)
+library(janitor)
+library(patchwork)
+
+## Load data
+  #Reading in csv files for species detections and environmental data
+  #Also creating objects for each file
+
+species_detections <- read.csv("data/raw/drone_species_detections.csv")
+environmentals <- read.csv("data/raw/drone_environmental_data.csv")
+
+combined_data <- species_detections |>
+  left_join(environmentals, by = "DATE")
+
+  #cleaning data
+  #removing columns that are not needed for this analysis
+cleaning <- combined_data |>
+  select(-SCREENGRAB_LINK, -COMMENTS, -TIDE_SOURCE, -X._PEOPLE_CP,
+         X._PEOPLE_PD, -X._PEOPLE_BB, -X._PEOPLE_DP, -CL_CON_SOURCE,
+         -CL_CON_TIME,-O2_PPM_SOURCE, -O2_PPM_TIME, -O2._SOURCE,
+         -O2._TIME, -SALINITY_SOURCE, -SALINITY_TIME, -WIND_SOURCE,
+         -WIND_TIME, -SST_SOURCE, -SST_TIME, -SITE.y, -ADJUSTED_DETECTION_TIME,
+         -DETECTION_TIME_STAMP, -ROAMING_SYSTEMATIC)
+
+  #cleaning column names
+clean <-cleaning |>
+  clean_names()
+
+clean$date <- mdy(clean$date)
+
+
+clean_date <- as.Date(clean$date)
+
+# Species abundance
+species_abundance <- clean |>
+  filter(!is.na(species), species !="") |>
+  group_by(species) |>
+  summarise(total = sum(number_individuals, na.rm = TRUE)) |>
+  ggplot(aes(x = reorder(species, -total), y = total)) +
+  geom_col(fill = "skyblue") +
+  theme_minimal() +
+  labs(x = "Species", y = "Total Individuals", title = "Most Commonly Detected Species") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Abundance over time
+abundance_over_time <- clean |>
+  group_by(date) |>
+  summarise(total = sum(number_individuals, na.rm = TRUE)) |>
+  ggplot(aes(x = date, y = total)) +
+  geom_line(color = "darkgreen", na.rm = TRUE) +
+  geom_smooth(method = "loess", se = FALSE, color = "black") +
+  theme_minimal() +
+  labs(title = "Species Abundance Over Time", x = "Date", y = "Total Individuals")
+
+
+species_abundance + abundance_over_time
+
+```
+
+## References
+- NOAA National Centers for Environmental Information, 2025, "BBSF1 Station Data",https://www.ndbc.noaa.gov/station_page.php?station=bbsf1
+
+- NOAA National Centers for Environmental Information, 2025, "VAKF1 Station Data", https://www.ndbc.noaa.gov/station_page.php?station=vakf1
+
+
+
+
