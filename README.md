@@ -61,6 +61,10 @@ Three main folders within the repository:
 ![Looking at species detections compared to sea surface temperature changes](results/img/sst_species_detections.png)
 ![Looking at total number of species detections](results/img/species_detections_plot.png)
 
+
+## Link to final presentation
+file:///Users/KimHeely/Desktop/portfolio/final_presentation.html#/title-slide 
+
 ## Author
 
 [Kimberly Heely]
