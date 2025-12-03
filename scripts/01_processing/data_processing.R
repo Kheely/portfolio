@@ -18,6 +18,7 @@ library(tidyverse)
 library(EVR628tools)
 library(readr)
 library(janitor)
+library(patchwork)
 
 ## Load data
   #Reading in csv files for species detections and environmental data
@@ -57,6 +58,15 @@ cleaning <- combined_data |>
   #cleaning column names
 clean_data <-cleaning |>
   clean_names()
+
+clean_data$date <- mdy(clean_data$date)
+
+
+clean_date <- as.Date(clean_data$date)
+clean_data %>%
+  group_by(date) %>%
+  summarise(total = sum(number_individuals, na.rm = TRUE)) %>%
+  nrow()
 
  #viewing new clean version of data
 view(clean_data)
@@ -107,6 +117,30 @@ detections_bar <- clean_data |>
   labs(x = "Site",
        y = "Total Individuals Detected")
 
+
+##Some extra visualizations
+# Species abundance
+species_abundance <- clean_data |>
+  filter(!is.na(species), species !="") |>
+  group_by(species) |>
+  summarise(total = sum(number_individuals, na.rm = TRUE)) |>
+  ggplot(aes(x = reorder(species, -total), y = total)) +
+  geom_col(fill = "skyblue") +
+  theme_minimal() +
+  labs(x = "Species", y = "Total Individuals", title = "Most Commonly Detected Species") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Abundance over time
+abundance_over_time <- clean_data |>
+  group_by(date) |>
+  summarise(total = sum(number_individuals, na.rm = TRUE)) |>
+  ggplot(aes(x = date, y = total)) +
+  geom_line(color = "darkgreen", na.rm = TRUE) +
+  geom_smooth(method = "loess", se = FALSE, color = "black") +
+  theme_minimal() +
+  labs(title = "Species Abundance Over Time", x = "Date", y = "Total Individuals")
+
+abundance_over_time + species_abundance
 
 # EXPORT
   #saving cleaned & combined data set into the processed folder
